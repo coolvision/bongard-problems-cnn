@@ -20,6 +20,7 @@ class ofApp : public ofBaseApp {
     ofImage img;
     Mat img_m;
     
+    ofImage layer_img;
     int layer_i = 0;
     
     ofPoint off;
@@ -33,9 +34,11 @@ class ofApp : public ofBaseApp {
 
     // image offset
     ofxVec2Slider offset;
-    // image scale
     ofxFloatSlider zoom;
 
+    ofxVec2Slider layer_offset;
+    ofxFloatSlider layer_zoom;
+    
 public:
     void setup();
     void update();

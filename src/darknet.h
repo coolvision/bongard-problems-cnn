@@ -39,6 +39,8 @@ public:
     
     // NN filters visualization
     std::vector<cv::Mat> layers;
+    std::vector<cv::Mat> layers8;
+    int layers_n = 0;
     
     std::string cfg;
     std::string weights;

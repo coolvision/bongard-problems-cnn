@@ -139,22 +139,86 @@ bool Yolo::detect(cv::Mat &img) {
 
     // get layers number and info about each layer
     //layers
+    cout << "net->n " << net->n << endl;
+    for (int i = 0; i < net->n; i++) {
+        cout << "layer " << i <<
+            " i " << net->layers[i].inputs <<
+            " o " << net->layers[i].outputs <<
+            " in " << net->layers[i].h <<
+            " x " << net->layers[i].w <<
+            " x " << net->layers[i].c <<
+            " out " << net->layers[i].out_h <<
+            " x " << net->layers[i].out_w <<
+            " x " << net->layers[i].out_c <<
+            " size " << net->layers[i].size <<
+            " stride " << net->layers[i].stride <<
+            " pad " << net->layers[i].pad << endl;
+    }
     
-    
-    
-    
+    layers.resize(net->n);
+    layers8.resize(net->n);
+    layers_n = net->n;
     
     return true;
 }
 
-bool Yolo::getActivations(int i) {
+bool Yolo::getActivations(int layer_i) {
     
     // put filter responces from the first layer into an opencv matrix
+    if (layer_i >= net->n) return false;
     
+    cout << "getActivations " << layer_i << endl;
     
+    int act_n = ceil(sqrt((float)net->layers[layer_i].out_c));
     
+    cout << "act_n " << act_n << ", total " << net->layers[layer_i].out_c << endl;
     
+    // number of output images
+    // ok, get one image for a start
+    layers[layer_i].create(net->layers[layer_i].out_h * act_n,
+                     net->layers[layer_i].out_w * act_n,
+                     CV_32F);
+    layers8[layer_i].create(net->layers[layer_i].out_h * act_n,
+                      net->layers[layer_i].out_w * act_n,
+                      CV_8UC1);
+    layers8[layer_i].setTo(cv::Scalar(0));
     
+
+    // number of filters
+    cv::Mat one_activation(net->layers[layer_i].out_h,
+                           net->layers[layer_i].out_w,
+                           CV_32F);
+    cv::Mat one_activation8(net->layers[layer_i].out_h,
+                           net->layers[layer_i].out_w,
+                           CV_8UC1);
+    
+    int act_w = net->layers[layer_i].out_w;
+    int act_h = net->layers[layer_i].out_h;
+    int act_size = net->layers[layer_i].out_h * net->layers[layer_i].out_w;
+    int act_i = 0;
+    for (int i = 0; i < act_n; i++) {
+        for (int j = 0; j < act_n; j++) {
+            act_i = i * act_n + j;
+            if (act_i > net->layers[layer_i].out_c) break;
+            
+            //cout << "set " << i << " " << j << " " << act_i << endl;
+            
+            memcpy(one_activation.data,
+                   net->layers[layer_i].output + act_i * act_size,
+                   sizeof(float) * act_size);
+            
+           // one_activation.convertTo(one_activation8, CV_8UC1, 10.0f);
+            
+            cv::normalize(one_activation, one_activation8, 0, 255,
+                          cv::NORM_MINMAX, CV_8UC1);
+        
+//            cout << "layers8 " << layers8[i].cols << " " << layers8[i].rows << endl;
+//            cout << "copy " << j*act_w << " " << i*act_h << " " << act_w << " " << act_h << endl;
+            
+            one_activation8.copyTo(layers8[layer_i](cv::Rect(j*act_w, i*act_h,
+                                                       act_w, act_h)));
+        }
+    }
 }
 
     

@@ -14,11 +14,20 @@ void ofApp::setup() {
     gui.add(offset.setup("offset", ofPoint(0.0f, 0.0f),
                               ofPoint(-500.0f, -500.0f),
                               ofPoint(500.0f, 500.0f)));
-    gui.add(zoom.setup("zoom", 1.0f, 0.1f, 4.0f));
+    gui.add(zoom.setup("zoom", 1.0f, 0.1f, 5.0f));
 
+    
+    gui.add(layer_offset.setup("layer_offset", ofPoint(0.0f, 0.0f),
+                         ofPoint(-500.0f, -500.0f),
+                         ofPoint(500.0f, 500.0f)));
+    gui.add(layer_zoom.setup("layer_zoom", 1.0f, 0.05f, 4.0f));
+    
+    
     gui.loadFromFile("settings.xml");
 
     yolo.cfg = ofToDataPath("tiny-yolo-voc.cfg", true);
     yolo.weights = ofToDataPath("tiny-yolo-voc.weights", true);
     yolo.load();
+    
+//    ofSetMinMagFilters(GL_NEAREST, GL_NEAREST);
 }

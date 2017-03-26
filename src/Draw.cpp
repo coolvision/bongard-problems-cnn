@@ -17,7 +17,14 @@ void ofApp::draw() {
     if (img.isAllocated()) {
         img.draw(off, w / zoom, h / zoom);
     }
-
+    
+    if (!yolo.layers8.empty() && layer_img.isAllocated()) {
+        layer_img.draw(ofPoint(layer_offset->x, layer_offset->y),
+                       layer_img.getWidth() / layer_zoom,
+                       layer_img.getHeight() / layer_zoom);
+    }
+    
+    
     for (int i = 0; i < yolo.objects.size(); i++) {
         ofSetColor(ofColor::darkRed);
         ofSetLineWidth(2);
