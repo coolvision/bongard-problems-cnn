@@ -58,6 +58,55 @@ bool Yolo::release() {
     free(net);
 }
 
+box get_region_box(float *x, float *biases, int n, int index, int i, int j, int w, int h)
+{
+    box b;
+    b.x = (i + logistic_activate(x[index + 0])) / w;
+    b.y = (j + logistic_activate(x[index + 1])) / h;
+    b.w = exp(x[index + 2]) * biases[2*n]   / w;
+    b.h = exp(x[index + 3]) * biases[2*n+1] / h;
+    return b;
+}
+
+void Yolo::get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness, int *map, float tree_thresh)
+{
+    int i,j,n;
+    float *predictions = l.output;
+    for (i = 0; i < l.w*l.h; ++i){
+        int row = i / l.w;
+        int col = i % l.w;
+        for(n = 0; n < l.n; ++n){
+            int index = i*l.n + n;
+            int p_index = index * (l.classes + 5) + 4;
+            
+            float scale = predictions[p_index];
+            int box_index = index * (l.classes + 5);
+            boxes[index] = get_region_box(predictions, l.biases, n, box_index, col, row, l.w, l.h);
+            boxes[index].x *= w;
+            boxes[index].y *= h;
+            boxes[index].w *= w;
+            boxes[index].h *= h;
+            
+            int class_index = index * (l.classes + 5) + 5;
+            
+            cout << "r " << row <<
+                    " c " << col <<
+                    " i " << i <<
+                    " n " << n <<
+                    " in " << index <<
+                    " p_in " << p_index <<
+                    " b_in " << box_index <<
+                    " c_in " << class_index << endl;
+
+            for(j = 0; j < l.classes; ++j){
+                //cout << "class " << j << " " << scale*predictions[class_index+j] << endl;
+                float prob = scale*predictions[class_index+j];
+                probs[index][j] = (prob > thresh) ? prob : 0;
+            }
+        }
+    }
+}
+
 bool Yolo::detect(cv::Mat &img) {
     if (!initialized) return false;
     
@@ -79,7 +128,7 @@ bool Yolo::detect(cv::Mat &img) {
     cout << ipl.width << " " << ipl.height << endl;
     *darknet_image = ipl_to_image(&ipl);
     
-    *fixed_size_image = resize_image(*darknet_image, net->w, net->h);
+   // *fixed_size_image = resize_image(*darknet_image, net->w, net->h);
     
     layer l = net->layers[net->n-1];
     
@@ -87,7 +136,7 @@ bool Yolo::detect(cv::Mat &img) {
         cout << "!fixed_size_image" << endl;
         return false;
     }
-    float *X = fixed_size_image->data;
+    float *X = darknet_image->data;
     if (!X) {
         cout << "!X" << endl;
         return false;
@@ -142,6 +191,7 @@ bool Yolo::detect(cv::Mat &img) {
     cout << "net->n " << net->n << endl;
     for (int i = 0; i < net->n; i++) {
         cout << "layer " << i <<
+            " n " << net->layers[i].n <<
             " i " << net->layers[i].inputs <<
             " o " << net->layers[i].outputs <<
             " in " << net->layers[i].h <<
@@ -162,12 +212,91 @@ bool Yolo::detect(cv::Mat &img) {
     return true;
 }
 
-bool Yolo::getActivations(int layer_i) {
+bool Yolo::getWeights(int layer_i, bool norm_all) {
+    
+    
+}
+
+bool Yolo::getActivations(int layer_i, bool norm_all) {
     
     // put filter responces from the first layer into an opencv matrix
     if (layer_i >= net->n) return false;
     
-    cout << "getActivations " << layer_i << endl;
+    cout << "getActivations " << layer_i << " " << net->layers[layer_i].type << endl;
+    
+    if (net->layers[layer_i].type == REGION) {
+        
+        cout << "detection layer " << layer_i << endl;
+        
+        layer l = net->layers[layer_i];
+        
+        // for a single class, show probability for 5 boxes
+        int class_i = 0;
+        
+        // for 5 boxes
+        int act_n = 3;
+        int boxes_n = 5;
+
+        layers[layer_i].create(l.w * act_n, l.w * act_n, CV_32F);
+        layers8[layer_i].create(l.w * act_n, l.w * act_n, CV_8UC1);
+        layers[layer_i].setTo(cv::Scalar(0));
+        layers8[layer_i].setTo(cv::Scalar(0));
+        
+        cv::Mat one_activation(l.w, l.w, CV_32F);
+        cv::Mat one_activation8(l.w, l.w, CV_8UC1);
+        
+        int act_h = l.w;
+        int act_size = l.w * l.w;
+        int act_w = l.w;
+        
+        for (int ai = 0; ai < act_n; ai++) {
+            for (int aj = 0; aj < act_n; aj++) {
+                int box_i = ai * act_n + aj;
+                if (box_i >= boxes_n) break;
+                
+                // for each box, get a specific class probability
+                float *f = (float *)one_activation.data;
+                float *predictions = l.output;
+                for (int a = 0; a < act_h; a++) {
+                    for (int b = 0; b < act_w; b++) {
+                        
+                        int i = a * act_w + b;
+                        
+                        int index = i*l.n + box_i;
+                        int p_index = index * (l.classes + 5) + 4;
+                        float scale = predictions[p_index];
+                        
+                        int class_index = index * (l.classes + 5) + 5;
+                        int box_index = index * (l.classes + 5);
+                        
+                        //float prob = scale*predictions[class_index+class_i];
+                        float prob = predictions[box_index+2];
+                        
+                        f[a*act_w + b] = prob;
+                    }
+                }
+                
+                one_activation.copyTo(layers[layer_i](cv::Rect(aj*act_w, ai*act_h,
+                                                               act_w, act_h)));
+                
+                if (!norm_all) {
+                    cv::normalize(one_activation, one_activation8, 0, 255,
+                                  cv::NORM_MINMAX, CV_8UC1);
+                    one_activation8.copyTo(layers8[layer_i](cv::Rect(aj*act_w, ai*act_h,
+                                                                     act_w, act_h)));
+                }
+            }
+        }
+        
+        if (norm_all) {
+            cv::normalize(layers[layer_i], layers8[layer_i], 0, 255,
+                          cv::NORM_MINMAX, CV_8UC1);
+        }
+        
+        return true;
+    }
+    
+    
     
     int act_n = ceil(sqrt((float)net->layers[layer_i].out_c));
     
@@ -181,6 +310,7 @@ bool Yolo::getActivations(int layer_i) {
     layers8[layer_i].create(net->layers[layer_i].out_h * act_n,
                       net->layers[layer_i].out_w * act_n,
                       CV_8UC1);
+    layers[layer_i].setTo(cv::Scalar(0));
     layers8[layer_i].setTo(cv::Scalar(0));
     
 
@@ -191,34 +321,39 @@ bool Yolo::getActivations(int layer_i) {
     cv::Mat one_activation8(net->layers[layer_i].out_h,
                            net->layers[layer_i].out_w,
                            CV_8UC1);
-    
-    int act_w = net->layers[layer_i].out_w;
+
     int act_h = net->layers[layer_i].out_h;
     int act_size = net->layers[layer_i].out_h * net->layers[layer_i].out_w;
     int act_i = 0;
+    int act_w = net->layers[layer_i].out_w;
+
     for (int i = 0; i < act_n; i++) {
         for (int j = 0; j < act_n; j++) {
             act_i = i * act_n + j;
             if (act_i > net->layers[layer_i].out_c) break;
-            
-            //cout << "set " << i << " " << j << " " << act_i << endl;
-            
+
             memcpy(one_activation.data,
                    net->layers[layer_i].output + act_i * act_size,
                    sizeof(float) * act_size);
+
+            one_activation.copyTo(layers[layer_i](cv::Rect(j*act_w, i*act_h,
+                                                               act_w, act_h)));
+            if (!norm_all) {
+                cv::normalize(one_activation, one_activation8, 0, 255,
+                              cv::NORM_MINMAX, CV_8UC1);
+                
+                one_activation8.copyTo(layers8[layer_i](cv::Rect(j*act_w, i*act_h,
+                                                                 act_w, act_h)));
+            }
             
-           // one_activation.convertTo(one_activation8, CV_8UC1, 10.0f);
-            
-            cv::normalize(one_activation, one_activation8, 0, 255,
-                          cv::NORM_MINMAX, CV_8UC1);
-        
-//            cout << "layers8 " << layers8[i].cols << " " << layers8[i].rows << endl;
-//            cout << "copy " << j*act_w << " " << i*act_h << " " << act_w << " " << act_h << endl;
-            
-            one_activation8.copyTo(layers8[layer_i](cv::Rect(j*act_w, i*act_h,
-                                                       act_w, act_h)));
         }
     }
+    if (norm_all) {
+        cv::normalize(layers[layer_i], layers8[layer_i], 0, 255,
+                                  cv::NORM_MINMAX, CV_8UC1);
+    }
+    
+    return true;
 }
 
     

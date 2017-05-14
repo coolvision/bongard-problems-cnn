@@ -25,19 +25,19 @@ void ofApp::draw() {
     }
     
     
-    for (int i = 0; i < yolo.objects.size(); i++) {
-        ofSetColor(ofColor::darkRed);
-        ofSetLineWidth(2);
-        ofNoFill();
-        ofDrawRectangle(off.x + (float)yolo.objects[i].box.x/zoom,
-                        off.y + (float)yolo.objects[i].box.y/zoom,
-                        (float)yolo.objects[i].box.width/zoom,
-                        (float)yolo.objects[i].box.height/zoom);
-        ofDrawBitmapStringHighlight(VocNames[yolo.objects[i].id],
-                           off.x + (float)yolo.objects[i].box.x/zoom,
-                           off.y + (float)yolo.objects[i].box.y/zoom);
-        
-    }
+    
+    
+    
+//    for (int i = 0; i < yolo.objects.size(); i++) {
+//        ofSetColor(ofColor::darkRed);
+//        ofSetLineWidth(2);
+//        ofNoFill();
+//        ofDrawRectangle(off.x + (float)yolo.objects[i].box.x/zoom,
+//                        off.y + (float)yolo.objects[i].box.y/zoom,
+//                        (float)yolo.objects[i].box.width/zoom,
+//                        (float)yolo.objects[i].box.height/zoom);
+//        
+//    }
     
     gui.draw();
 }

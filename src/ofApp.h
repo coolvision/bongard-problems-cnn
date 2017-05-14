@@ -38,6 +38,13 @@ class ofApp : public ofBaseApp {
 
     ofxVec2Slider layer_offset;
     ofxFloatSlider layer_zoom;
+
+    ofxToggle norm_all;
+    
+    ofxVec2Slider image_offset;
+    ofxVec2Slider patch_size;
+    ofxVec2Slider patch_offset;
+    ofxFloatSlider patch_zoom;
     
 public:
     void setup();
@@ -56,5 +63,4 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-
 };

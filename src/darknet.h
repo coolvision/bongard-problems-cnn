@@ -26,6 +26,11 @@ public:
     cv::Rect_<float> box;
 };
 
+typedef struct image image;
+typedef struct network network;
+typedef struct box box;
+typedef struct layer layer;
+
 class Yolo {
 public:
     Yolo() {};
@@ -33,7 +38,9 @@ public:
     bool load();
     bool detect(cv::Mat &img);
     bool release();
-    bool getActivations(int i);
+    bool getActivations(int i, bool norm_all);
+    bool getWeights(int layer_i, bool norm_all);
+    void get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness, int *map, float tree_thresh);
     
     std::vector<Object> objects;
     
@@ -47,10 +54,6 @@ public:
     bool initialized = false;
     float thresh = .24;
 
-    typedef struct image image;
-    typedef struct network network;
-    typedef struct box box;
-    
     image *darknet_image = NULL;
     image *fixed_size_image = NULL;
     network *net = NULL;
