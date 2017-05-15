@@ -9,6 +9,19 @@
 #include <iostream>
 #include <fstream>
 
+namespace darknet {
+extern "C"
+{
+    #include "detection_layer.h"
+    #include "parser.h"
+    #include "region_layer.h"
+    #include "utils.h"
+    extern image ipl_to_image(IplImage* src);
+}
+}
+
+using namespace darknet;
+
 static const char * VocNames[] = { "aeroplane", "bicycle", "bird",
     "boat", "bottle", "bus", "car",
     "cat", "chair", "cow", "diningtable",

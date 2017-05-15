@@ -12,20 +12,33 @@ using namespace cv;
 using namespace ofxCv;
 using namespace std;
 
-class ofApp : public ofBaseApp {
-
-    Yolo yolo;
-    vector<cv::Rect> detections;
+class ImageLayers {
+public:
     
     ofImage img;
     Mat img_m;
     
-    ofImage layer_img;
-    int layer_i = 0;
+    //ofImage layer_img;
+    //int layer_i = 0;
+    
+    vector<ofImage> layer_img;
+};
+
+class ofApp : public ofBaseApp {
+
+    Yolo yolo;
+    //vector<cv::Rect> detections;
+    
+    ImageLayers image;
+    int layer_i;
+    
+    vector<unsigned char> layer_key;
     
     ofPoint off;
     
-    bool process;
+    bool process = true;
+    bool update_layers_vis = true;
+    
     string data_path;
     int image_i;
     int data_dir_size;
@@ -41,10 +54,10 @@ class ofApp : public ofBaseApp {
 
     ofxToggle norm_all;
     
-    ofxVec2Slider image_offset;
-    ofxVec2Slider patch_size;
-    ofxVec2Slider patch_offset;
-    ofxFloatSlider patch_zoom;
+//    ofxVec2Slider image_offset;
+//    ofxVec2Slider patch_size;
+//    ofxVec2Slider patch_offset;
+//    ofxFloatSlider patch_zoom;
     
 public:
     void setup();
