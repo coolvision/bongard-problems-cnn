@@ -20,18 +20,31 @@
 void ofApp::draw() {
 
     ofSetColor(ofColor::white);
-    float w = image.img.getWidth();
-    float h = image.img.getHeight();
-    off.set(offset->x, offset->y);
-    if (image.img.isAllocated()) {
-        image.img.draw(off, w / zoom, h / zoom);
-    }
     
-    if (layer_i >= 0 && layer_i < image.layer_img.size()) {
-        if (image.layer_img[layer_i].isAllocated()) {
-            image.layer_img[layer_i].draw(ofPoint(layer_offset->x, layer_offset->y),
-                           image.layer_img[layer_i].getWidth() / layer_zoom,
-                           image.layer_img[layer_i].getHeight() / layer_zoom);
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            
+            int idx = j * 2 + i;
+            
+            float w = images[idx].img.getWidth();
+            float h = images[idx].img.getHeight();
+            off.set(offset->x + j*w/zoom, offset->y + i*h/zoom);
+            if (images[idx].img.isAllocated()) {
+                images[idx].img.draw(off, w / zoom, h / zoom);
+            }
+            
+            if (layer_i >= 0 && layer_i < images[idx].layer_img.size()) {
+                float w = images[idx].layer_img[layer_i].getWidth() / layer_zoom;
+                float h = images[idx].layer_img[layer_i].getHeight() / layer_zoom;
+            
+                ofPoint off = ofPoint(layer_offset->x + j*w + j*10,
+                                      layer_offset->y + i*h + i*10);
+                
+                if (images[idx].layer_img[layer_i].isAllocated()) {
+                    images[idx].layer_img[layer_i].draw(off, w, h);
+                }
+            }
+            
         }
     }
     

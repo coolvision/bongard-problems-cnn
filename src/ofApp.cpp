@@ -8,13 +8,17 @@ void ofApp::update() {
         
         process = false;
         
+        cout << "data_path " << data_path << endl;
+        
         ofDirectory dir;
-        dir.allowExt("png");
-        dir.allowExt("jpg");
+//        dir.allowExt("png");
+//        dir.allowExt("jpg");
         dir.listDir(data_path);
         dir.sort();
         
         data_dir_size = dir.size();
+        
+        cout << "data_dir_size " << data_dir_size << endl;
         
         if (data_dir_size > 0) {
             
@@ -24,58 +28,46 @@ void ofApp::update() {
             if (image_i < 0) image_i = 0;
             
             string path = dir.getPath(image_i);
-            image.img.load(path);
-            image.img_m = toCv(image.img);
             
-//            if (patch_size->x > 1 && patch_size->y > 1 &&
-//                image_offset->x + patch_size->x < img_m.cols &&
-//                image_offset->y + patch_size->y < img_m.rows) {
-//                
-//                Mat patch_orig(patch_size->x, patch_size->y, img_m.type());
-//                img_m(cv::Rect(image_offset->x, image_offset->y,
-//                        patch_orig.cols, patch_orig.rows)).copyTo(patch_orig);
-//                
-//                Mat patch;
-//                resize(patch_orig, patch, cv::Size(0, 0),
-//                       patch_zoom, patch_zoom);
-//                
-//                if (patch_offset->x + patch.cols < img_m.cols &&
-//                    patch_offset->y + patch.rows < img_m.rows) {
-//                    
-//                    img_m.setTo(cv::Scalar(0, 0, 0));
-//                    
-//                    patch.copyTo(img_m(cv::Rect(patch_offset->x, patch_offset->y,
-//                                          patch.cols, patch.rows)));
-//                }
-//            }
+            cout << "path " << path << endl;
             
-            image.img.update();
+            images.clear();
+            images.resize(4);
             
-            yolo.detect(image.img_m);
-            
-//            if (image.layer_i < 0) image.layer_i = 0;
-//            if (image.layer_i > yolo.layers_n) image.layer_i = yolo.layers_n;
-//            
-//            cout << "layer_i " << image.layer_i << endl;
-//            
-            
-            image.layer_img.resize(yolo.net->n);
+            for (int j = 0; j < 4; j++) {
+                
+                string img_path;
+                if (j > 1) {
+                    img_path = path + "/" + ofToString(j+6) + ".png";
+                } else {
+                    img_path = path + "/" + ofToString(j) + ".png";
+                }
 
-            for (int i = 0; i < yolo.net->n; i++) {
-
-                yolo.getActivations(i, norm_all);
-
-                toOf(yolo.layers8[i], image.layer_img[i]);
-                image.layer_img[i].update();
-                image.layer_img[i].getTextureReference().
+                images[j].img.load(img_path);
+                
+                cout << "load " << img_path << endl;
+                
+                images[j].img_m = toCv(images[j].img);
+                
+                images[j].img.update();
+                
+                yolo.detect(images[j].img_m);
+                
+                images[j].layer_img.resize(yolo.net->n);
+                
+                for (int i = 0; i < yolo.net->n; i++) {
+                    
+                    yolo.getActivations(i, norm_all);
+                    
+                    toOf(yolo.layers8[i], images[j].layer_img[i]);
+                    images[j].layer_img[i].update();
+                    images[j].layer_img[i].getTextureReference().
                     setTextureMinMagFilter(GL_NEAREST,GL_NEAREST);
+                }
             }
+
         }
     }
-    
-//    if (update_layers_vis) {
-//
-//    }
 }
 
 void ofApp::keyPressed(int key) {
@@ -89,8 +81,6 @@ void ofApp::keyPressed(int key) {
         if (key == layer_key[i]) {
             layer_i = i;
             cout << "keyPressed: layer_i " << layer_i << endl;
-            //process = true;
-            //update_layers_vis = true;
         }
     }
     
@@ -111,7 +101,6 @@ void ofApp::keyPressed(int key) {
 
     if (key == 'u' || key == OF_KEY_LEFT || key == OF_KEY_RIGHT) {
         process = true;
-        //update_layers_vis = true;
     }
 
     else if(key == 's'){

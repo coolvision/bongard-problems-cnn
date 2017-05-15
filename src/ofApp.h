@@ -29,7 +29,9 @@ class ofApp : public ofBaseApp {
     Yolo yolo;
     //vector<cv::Rect> detections;
     
-    ImageLayers image;
+    vector<ImageLayers> images;
+    
+    //ImageLayers image;
     int layer_i;
     
     vector<unsigned char> layer_key;
@@ -37,7 +39,7 @@ class ofApp : public ofBaseApp {
     ofPoint off;
     
     bool process = true;
-    bool update_layers_vis = true;
+    //bool update_layers_vis = true;
     
     string data_path;
     int image_i;
