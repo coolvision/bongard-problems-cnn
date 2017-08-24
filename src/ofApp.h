@@ -12,35 +12,139 @@ using namespace cv;
 using namespace ofxCv;
 using namespace std;
 
-class ImageLayers {
+void colorDilate(Mat &m);
+void colorDilatePositive(Mat &m);
+void classifyPixels(Mat &in, Mat &m, Mat &out);
+
+class VisImage {
+public:
+    Mat m;
+    ofImage of_img;
+    
+    void copyFrom(Mat _m);
+    void load(string img_path);
+    void makeOF();
+    void draw(ofPoint off, float zoom);
+};
+
+// filters responses
+// for one image for one layer
+class LayerVis {
 public:
     
-    ofImage img;
-    Mat img_m;
+    int act_side;
+    int act_n;
+    int act_w;
+    int act_h;
     
-    //ofImage layer_img;
-    //int layer_i = 0;
+    string name;
     
-    vector<ofImage> layer_img;
+    vector<VisImage> act_maps;
+
+    // all fiters for a layer, combined into a grid
+    VisImage grid;
+    
+    void init(layer *l);
+    void init(LayerVis *l);
+    
+    void copyActMapsFrom(LayerVis *l);
+    void makeActMaps();
+    void drawActMaps(ofPoint off, float zoom);
+};
+
+// for one image
+// filter responses for all layers
+class ImageActivations {
+public:
+    
+    VisImage image;
+
+    vector<LayerVis> layers;
+};
+
+class ClassificationRule {
+public:
+    
+    cv::Rect activation_region;
+    int layer_i;
+    int feature_map_i;
+    
+    // test if image is positive or negative
+    bool apply(ImageActivations &img);
+};
+
+class ImagesSet {
+public:
+    
+    ImagesSet() {
+        positives_intersection;
+        
+        selected_processed.name = "selected_processed";
+        selected_classified.name = "selected_classified";
+        
+        positives_union.name = "positives_union";
+        negatives_union.name = "negatives_union";
+        color_union.name = "color_union";
+    };
+    
+// images and NN activations
+    vector<ImageActivations> images;
+    
+    bool load(string path);
+    bool extractFetures(Darknet *dn, int layer_i, int selected_image);
+    ClassificationRule findClassificationRule(int selected_image);
+    void classifyPixels(int selected_image);
+    
+    int layers_n = -1;
+    int layer_i = -1;
+    
+// for visualization only
+//===================================================
+    vector<LayerVis> positives_processed;
+    LayerVis positives_intersection;
+    
+    LayerVis selected_processed;
+    LayerVis selected_classified;
+    
+    LayerVis positives_union;
+    LayerVis negatives_union;
+    LayerVis color_union;
+    
+    bool draw(int layer_i, ofPoint layer_offset, float layer_zoom);
+    bool drawImages(int layer_i, ofPoint offset, float zoom);
+//===================================================
 };
 
 class ofApp : public ofBaseApp {
 
-    Yolo yolo;
-    //vector<cv::Rect> detections;
+    Darknet dn;
     
-    vector<ImageLayers> images;
+    ImagesSet i1;
+    
+    // for all images (12)
+    // all layer activations
+    vector<ImageActivations> images;
+
+    vector<LayerVis> color_union;
+    
+//    vector<LayerVis> positives_processed;
+//    LayerVis positives_intersection;
+//    LayerVis selected_processed;
+//    LayerVis selected_classified;
+    
+    LayerVis positives_union;
+    LayerVis negatives_union;
+    //LayerVis color_union;
     
     //ImageLayers image;
-    int layer_i;
+    int layer_i= 7;
     
     vector<unsigned char> layer_key;
     
     ofPoint off;
     
     bool process = true;
-    //bool update_layers_vis = true;
-    
+
     string data_path;
     int image_i;
     int data_dir_size;
@@ -51,16 +155,14 @@ class ofApp : public ofBaseApp {
     ofxVec2Slider offset;
     ofxFloatSlider zoom;
 
+    ofxIntSlider selected_image;
+    
     ofxVec2Slider layer_offset;
     ofxFloatSlider layer_zoom;
 
     ofxToggle norm_all;
-    
-//    ofxVec2Slider image_offset;
-//    ofxVec2Slider patch_size;
-//    ofxVec2Slider patch_offset;
-//    ofxFloatSlider patch_zoom;
-    
+    ofxToggle threshold;
+
 public:
     void setup();
     void update();

@@ -11,8 +11,6 @@ void ofApp::update() {
         cout << "data_path " << data_path << endl;
         
         ofDirectory dir;
-//        dir.allowExt("png");
-//        dir.allowExt("jpg");
         dir.listDir(data_path);
         dir.sort();
         
@@ -29,43 +27,10 @@ void ofApp::update() {
             
             string path = dir.getPath(image_i);
             
-            cout << "path " << path << endl;
-            
-            images.clear();
-            images.resize(4);
-            
-            for (int j = 0; j < 4; j++) {
-                
-                string img_path;
-                if (j > 1) {
-                    img_path = path + "/" + ofToString(j+6) + ".png";
-                } else {
-                    img_path = path + "/" + ofToString(j) + ".png";
-                }
-
-                images[j].img.load(img_path);
-                
-                cout << "load " << img_path << endl;
-                
-                images[j].img_m = toCv(images[j].img);
-                
-                images[j].img.update();
-                
-                yolo.detect(images[j].img_m);
-                
-                images[j].layer_img.resize(yolo.net->n);
-                
-                for (int i = 0; i < yolo.net->n; i++) {
-                    
-                    yolo.getActivations(i, norm_all);
-                    
-                    toOf(yolo.layers8[i], images[j].layer_img[i]);
-                    images[j].layer_img[i].update();
-                    images[j].layer_img[i].getTextureReference().
-                    setTextureMinMagFilter(GL_NEAREST,GL_NEAREST);
-                }
-            }
-
+            i1.load(path);
+            i1.extractFetures(&dn, layer_i, selected_image);
+            i1.findClassificationRule(selected_image);
+            i1.classifyPixels(selected_image);
         }
     }
 }

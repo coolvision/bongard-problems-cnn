@@ -22,15 +22,6 @@ extern "C"
 
 using namespace darknet;
 
-static const char * VocNames[] = { "aeroplane", "bicycle", "bird",
-    "boat", "bottle", "bus", "car",
-    "cat", "chair", "cow", "diningtable",
-    "dog", "horse", "motorbike",
-    "person", "pottedplant", "sheep",
-    "sofa", "train", "tvmonitor"
-};
-static int VocN = sizeof(VocNames) / sizeof(VocNames[0]);
-
 class Object {
 public:
     std::string name;
@@ -44,22 +35,29 @@ typedef struct network network;
 typedef struct box box;
 typedef struct layer layer;
 
-class Yolo {
+class Darknet {
 public:
-    Yolo() {};
-     ~Yolo();
+    Darknet() {};
+     ~Darknet();
     bool load();
     bool detect(cv::Mat &img);
     bool release();
     bool getActivations(int i, bool norm_all);
-    bool getWeights(int layer_i, bool norm_all);
-    void get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *boxes, int only_objectness, int *map, float tree_thresh);
     
-    std::vector<Object> objects;
-    
-    // NN filters visualization
+    // filters visualization
+    // all filters for each layer
+    std::vector<std::vector<cv::Mat> > filters;
+    std::vector<std::vector<cv::Mat> > filters8;
+    std::vector<std::vector<cv::Mat> > filters_t;
+   
+    // grid of filters for each layer
     std::vector<cv::Mat> layers;
     std::vector<cv::Mat> layers8;
+    std::vector<cv::Mat> layers_t;
+    
+    std::vector<int> act_side;
+    std::vector<int> act_n;
+    
     int layers_n = 0;
     
     std::string cfg;

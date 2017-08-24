@@ -16,6 +16,7 @@
 		311DF864378748129984EA1D /* Kalman.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 77A1A692522820F935B58762 /* Kalman.cpp */; };
 		45CC483A999BF1065A6B926C /* Distance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9DBD717072C35D324E101669 /* Distance.cpp */; };
 		483908258D00B98B4BE69F07 /* ofxLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78D67A00EB899FAC09430597 /* ofxLabel.cpp */; };
+		539F4C531F07AF40006A76F8 /* Process.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 539F4C521F07AF40006A76F8 /* Process.cpp */; };
 		53F8D0851E7E9BF300EAF3D9 /* Draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53F8D0831E7E9BF300EAF3D9 /* Draw.cpp */; };
 		53F8D0861E7E9BF300EAF3D9 /* Setup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 53F8D0841E7E9BF300EAF3D9 /* Setup.cpp */; };
 		53F8D4E41E7EA1A800EAF3D9 /* activation_layer.c in Sources */ = {isa = PBXBuildFile; fileRef = 53F8D4741E7EA1A800EAF3D9 /* activation_layer.c */; };
@@ -177,6 +178,7 @@
 		5105862F1606831E9239FEAF /* simd_functions.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = simd_functions.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gpu/device/simd_functions.hpp; sourceTree = SOURCE_ROOT; };
 		516717F84C0146512C47A3EC /* ofxCvHaarFinder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvHaarFinder.h; path = ../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h; sourceTree = SOURCE_ROOT; };
 		52AFA1F08C420992CAAAE648 /* ofxSlider.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxSlider.h; path = ../../../addons/ofxGui/src/ofxSlider.h; sourceTree = SOURCE_ROOT; };
+		539F4C521F07AF40006A76F8 /* Process.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Process.cpp; sourceTree = "<group>"; };
 		53F8D0831E7E9BF300EAF3D9 /* Draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Draw.cpp; sourceTree = "<group>"; };
 		53F8D0841E7E9BF300EAF3D9 /* Setup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Setup.cpp; sourceTree = "<group>"; };
 		53F8D4741E7EA1A800EAF3D9 /* activation_layer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = activation_layer.c; sourceTree = "<group>"; };
@@ -1137,6 +1139,7 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
+				539F4C521F07AF40006A76F8 /* Process.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -1269,6 +1272,7 @@
 				53F8D4E91E7EA1A800EAF3D9 /* blas.c in Sources */,
 				53F8D4FF1E7EA1A800EAF3D9 /* gemm.c in Sources */,
 				53F8D5031E7EA1A800EAF3D9 /* image.c in Sources */,
+				539F4C531F07AF40006A76F8 /* Process.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				53F8D50E1E7EA1A800EAF3D9 /* region_layer.c in Sources */,
 				53F8D4E41E7EA1A800EAF3D9 /* activation_layer.c in Sources */,
