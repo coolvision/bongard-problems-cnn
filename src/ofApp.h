@@ -12,8 +12,8 @@ using namespace cv;
 using namespace ofxCv;
 using namespace std;
 
-void colorDilate(Mat &m);
-void colorDilatePositive(Mat &m);
+void colorDilate(Mat &m, int c_i = 0);
+//void colorDilatePositive(Mat &m);
 void classifyPixels(Mat &in, Mat &m, Mat &out);
 
 class VisImage {
@@ -40,7 +40,8 @@ public:
     string name;
     
     vector<VisImage> act_maps;
-
+    vector<VisImage> resized_act_maps;
+    
     // all fiters for a layer, combined into a grid
     VisImage grid;
     
@@ -50,6 +51,9 @@ public:
     void copyActMapsFrom(LayerVis *l);
     void makeActMaps();
     void drawActMaps(ofPoint off, float zoom);
+    
+    void drawResizedActMaps(ofPoint off, float zoom);
+    void resizeActMaps(int n);
 };
 
 // for one image
@@ -76,22 +80,14 @@ public:
 class ImagesSet {
 public:
     
-    ImagesSet() {
-        positives_intersection;
-        
-        selected_processed.name = "selected_processed";
-        selected_classified.name = "selected_classified";
-        
-        positives_union.name = "positives_union";
-        negatives_union.name = "negatives_union";
-        color_union.name = "color_union";
-    };
+    ImagesSet() {};
     
 // images and NN activations
     vector<ImageActivations> images;
     
     bool load(string path);
     bool extractFetures(Darknet *dn, int layer_i, int selected_image);
+    bool processLayer(Darknet *dn, int layer_i, int selected_image);
     ClassificationRule findClassificationRule(int selected_image);
     void classifyPixels(int selected_image);
     
@@ -100,17 +96,18 @@ public:
     
 // for visualization only
 //===================================================
-    vector<LayerVis> positives_processed;
+//    vector<LayerVis> positives_processed;
     LayerVis positives_intersection;
+    LayerVis negatives_intersection;
+
+    vector<LayerVis> positives_union;
+    vector<LayerVis> negatives_union;
+    vector<LayerVis> color_union;
     
-    LayerVis selected_processed;
-    LayerVis selected_classified;
+    vector<LayerVis> color_classified;
     
-    LayerVis positives_union;
-    LayerVis negatives_union;
-    LayerVis color_union;
-    
-    bool draw(int layer_i, ofPoint layer_offset, float layer_zoom);
+    bool draw(int layer_i, ofPoint layer_offset, float layer_zoom,
+              int selected_image);
     bool drawImages(int layer_i, ofPoint offset, float zoom);
 //===================================================
 };
@@ -123,21 +120,21 @@ class ofApp : public ofBaseApp {
     
     // for all images (12)
     // all layer activations
-    vector<ImageActivations> images;
+//    vector<ImageActivations> images;
 
-    vector<LayerVis> color_union;
+//    vector<LayerVis> color_union;
     
 //    vector<LayerVis> positives_processed;
 //    LayerVis positives_intersection;
 //    LayerVis selected_processed;
 //    LayerVis selected_classified;
     
-    LayerVis positives_union;
-    LayerVis negatives_union;
+//    LayerVis positives_union;
+//    LayerVis negatives_union;
     //LayerVis color_union;
     
     //ImageLayers image;
-    int layer_i= 7;
+    int layer_i= 10;
     
     vector<unsigned char> layer_key;
     

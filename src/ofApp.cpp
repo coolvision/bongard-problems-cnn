@@ -29,8 +29,10 @@ void ofApp::update() {
             
             i1.load(path);
             i1.extractFetures(&dn, layer_i, selected_image);
-            i1.findClassificationRule(selected_image);
-            i1.classifyPixels(selected_image);
+            i1.processLayer(&dn, layer_i, selected_image);
+            
+//            i1.findClassificationRule(selected_image);
+//            i1.classifyPixels(selected_image);
         }
     }
 }
@@ -46,6 +48,7 @@ void ofApp::keyPressed(int key) {
         if (key == layer_key[i]) {
             layer_i = i;
             cout << "keyPressed: layer_i " << layer_i << endl;
+            i1.processLayer(&dn, layer_i, selected_image);
         }
     }
     
