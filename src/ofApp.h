@@ -117,23 +117,7 @@ class ofApp : public ofBaseApp {
     Darknet dn;
     
     ImagesSet i1;
-    
-    // for all images (12)
-    // all layer activations
-//    vector<ImageActivations> images;
 
-//    vector<LayerVis> color_union;
-    
-//    vector<LayerVis> positives_processed;
-//    LayerVis positives_intersection;
-//    LayerVis selected_processed;
-//    LayerVis selected_classified;
-    
-//    LayerVis positives_union;
-//    LayerVis negatives_union;
-    //LayerVis color_union;
-    
-    //ImageLayers image;
     int layer_i= 10;
     
     vector<unsigned char> layer_key;

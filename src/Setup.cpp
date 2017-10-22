@@ -29,11 +29,8 @@ void ofApp::setup() {
     
     gui.loadFromFile("settings.xml");
 
-    dn.cfg = ofToDataPath("tiny-dn-voc.cfg", true);
-    dn.weights = ofToDataPath("tiny-dn-voc.weights", true);
-    
-    dn.cfg = ofToDataPath("shapes_test_7-1.cfg", true);
-    dn.weights = ofToDataPath("shapes_test_7-1_50.weights", true);
+//    dn.cfg = ofToDataPath("shapes_test_7-1.cfg", true);
+//    dn.weights = ofToDataPath("shapes_test_7-1_50.weights", true);
     
 //    dn.cfg = ofToDataPath("shapes_test_7-4.cfg", true);
 //    dn.weights = ofToDataPath("shapes_test_7-4_11.weights", true);

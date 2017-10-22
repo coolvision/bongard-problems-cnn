@@ -15,17 +15,17 @@ bool Darknet::load() {
         cout << "!weights_stream.good() " << weights << endl;
         return false;
     }
-    
+
     net = (network *)calloc(1, sizeof(network));
     *net = parse_network_cfg((char *)cfg.c_str());
 
     load_weights(net, (char *)weights.c_str());
-    
+
     set_batch_network(net, 1);
     srand(2222222);
-    
+
     layer l = net->layers[net->n-1];
-    
+
     probs_n = l.w*l.h*l.n;
     boxes = (box *)calloc(probs_n, sizeof(box));
     probs = (float **)calloc(probs_n, sizeof(float *));
@@ -52,29 +52,29 @@ bool Darknet::release() {
 
 bool Darknet::detect(cv::Mat &img) {
     if (!initialized) return false;
-    
+
     if (img.empty()) {
         cout << "img.empty()" << endl;
         return false;
     }
-    
+
     if (darknet_image) free_image(*darknet_image);
     if (fixed_size_image) free_image(*fixed_size_image);
     free(darknet_image);
     free(fixed_size_image);
-    
+
     darknet_image = (image *)calloc(1, sizeof(image));
     fixed_size_image = (image *)calloc(1, sizeof(image));
-    
+
     IplImage ipl = img.operator IplImage();
-    
+
     cout << ipl.width << " " << ipl.height << endl;
     *darknet_image = ipl_to_image(&ipl);
-    
+
    // *fixed_size_image = resize_image(*darknet_image, net->w, net->h);
-    
+
     layer l = net->layers[net->n-1];
-    
+
     if (!fixed_size_image) {
         cout << "!fixed_size_image" << endl;
         return false;
@@ -84,7 +84,7 @@ bool Darknet::detect(cv::Mat &img) {
         cout << "!X" << endl;
         return false;
     }
-    
+
     clock_t time=clock();
     network_predict(*net, X);
     clock_t time2=clock();
@@ -108,34 +108,34 @@ bool Darknet::detect(cv::Mat &img) {
             " stride " << net->layers[i].stride <<
             " pad " << net->layers[i].pad << endl;
     }
-    
+
     layers.resize(net->n);
     layers8.resize(net->n);
     layers_t.resize(net->n);
-    
+
     filters.resize(net->n);
     filters8.resize(net->n);
     filters_t.resize(net->n);
-    
+
     act_side.resize(net->n);
     act_n.resize(net->n);
-    
+
     layers_n = net->n;
-    
+
     return true;
 }
 
 bool Darknet::getActivations(int layer_i, bool norm_all) {
-    
+
     // put filter responces from the first layer into an opencv matrix
     if (layer_i >= net->n) return false;
-    
+
     cout << "getActivations " << layer_i << " " << net->layers[layer_i].type << endl;
-    
+
     act_side[layer_i] = ceil(sqrt((float)net->layers[layer_i].out_c));
     act_n[layer_i] = net->layers[layer_i].out_c;
     cout << "act_side " << act_side[layer_i] << ", total " << net->layers[layer_i].out_c << endl;
-    
+
     // number of output images
     // ok, get one image for a start
     layers[layer_i].create(net->layers[layer_i].out_h * act_side[layer_i],
@@ -147,7 +147,7 @@ bool Darknet::getActivations(int layer_i, bool norm_all) {
     layers_t[layer_i].create(net->layers[layer_i].out_h * act_side[layer_i],
                             net->layers[layer_i].out_w * act_side[layer_i],
                             CV_8UC1);
-    
+
     layers[layer_i].setTo(cv::Scalar(0));
     layers8[layer_i].setTo(cv::Scalar(0));
     layers_t[layer_i].setTo(cv::Scalar(0));
@@ -168,7 +168,7 @@ bool Darknet::getActivations(int layer_i, bool norm_all) {
     filters[layer_i].resize(act_n[layer_i]);
     filters8[layer_i].resize(act_n[layer_i]);
     filters_t[layer_i].resize(act_n[layer_i]);
-    
+
     for (int i = 0; i < act_side[layer_i]; i++) {
         for (int j = 0; j < act_side[layer_i]; j++) {
             act_i = i * act_side[layer_i] + j;
@@ -189,5 +189,3 @@ bool Darknet::getActivations(int layer_i, bool norm_all) {
 
     return true;
 }
-
-    

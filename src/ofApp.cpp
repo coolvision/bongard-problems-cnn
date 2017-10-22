@@ -30,9 +30,6 @@ void ofApp::update() {
             i1.load(path);
             i1.extractFetures(&dn, layer_i, selected_image);
             i1.processLayer(&dn, layer_i, selected_image);
-            
-//            i1.findClassificationRule(selected_image);
-//            i1.classifyPixels(selected_image);
         }
     }
 }
