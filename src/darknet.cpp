@@ -3,6 +3,10 @@
 //using namespace darknet;
 using namespace std;
 
+#ifdef DARKNET_GPU
+#include "cuda_runtime.h"
+#endif
+
 bool Darknet::load() {
 
     ifstream cfg_stream(cfg.c_str());
@@ -68,7 +72,7 @@ bool Darknet::detect(cv::Mat &img) {
 
     IplImage ipl = img.operator IplImage();
 
-    cout << ipl.width << " " << ipl.height << endl;
+    //cout << ipl.width << " " << ipl.height << endl;
     *darknet_image = ipl_to_image(&ipl);
 
    // *fixed_size_image = resize_image(*darknet_image, net->w, net->h);
@@ -90,23 +94,33 @@ bool Darknet::detect(cv::Mat &img) {
     clock_t time2=clock();
     printf("Predicted in %f seconds. %ld %ld %ld\n", sec(time2-time), CLOCKS_PER_SEC, time, time2);
 
+#ifdef DARKNET_GPU
+    get_network_output_gpu(*net);
+    cudaDeviceSynchronize();
+#endif
+
     // get layers number and info about each layer
     //layers
-    cout << "net->n " << net->n << endl;
+    //cout << "net->n " << net->n << endl;
     for (int i = 0; i < net->n; i++) {
-        cout << "layer " << i <<
-            " n " << net->layers[i].n <<
-            " i " << net->layers[i].inputs <<
-            " o " << net->layers[i].outputs <<
-            " in " << net->layers[i].h <<
-            " x " << net->layers[i].w <<
-            " x " << net->layers[i].c <<
-            " out " << net->layers[i].out_h <<
-            " x " << net->layers[i].out_w <<
-            " x " << net->layers[i].out_c <<
-            " size " << net->layers[i].size <<
-            " stride " << net->layers[i].stride <<
-            " pad " << net->layers[i].pad << endl;
+
+#ifdef DARKNET_GPU
+        get_network_output_layer_gpu(*net, i);
+        cudaDeviceSynchronize();
+#endif
+        // cout << "layer " << i <<
+        //     " n " << net->layers[i].n <<
+        //     " i " << net->layers[i].inputs <<
+        //     " o " << net->layers[i].outputs <<
+        //     " in " << net->layers[i].h <<
+        //     " x " << net->layers[i].w <<
+        //     " x " << net->layers[i].c <<
+        //     " out " << net->layers[i].out_h <<
+        //     " x " << net->layers[i].out_w <<
+        //     " x " << net->layers[i].out_c <<
+        //     " size " << net->layers[i].size <<
+        //     " stride " << net->layers[i].stride <<
+        //     " pad " << net->layers[i].pad << endl;
     }
 
     layers.resize(net->n);
@@ -130,11 +144,11 @@ bool Darknet::getActivations(int layer_i, bool norm_all) {
     // put filter responces from the first layer into an opencv matrix
     if (layer_i >= net->n) return false;
 
-    cout << "getActivations " << layer_i << " " << net->layers[layer_i].type << endl;
+    //cout << "getActivations " << layer_i << " " << net->layers[layer_i].type << endl;
 
     act_side[layer_i] = ceil(sqrt((float)net->layers[layer_i].out_c));
     act_n[layer_i] = net->layers[layer_i].out_c;
-    cout << "act_side " << act_side[layer_i] << ", total " << net->layers[layer_i].out_c << endl;
+    //cout << "act_side " << act_side[layer_i] << ", total " << net->layers[layer_i].out_c << endl;
 
     // number of output images
     // ok, get one image for a start

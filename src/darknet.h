@@ -16,6 +16,7 @@ extern "C"
     #include "parser.h"
     #include "region_layer.h"
     #include "utils.h"
+    #include "network.h"
     extern image ipl_to_image(IplImage* src);
 }
 }
@@ -43,23 +44,23 @@ public:
     bool detect(cv::Mat &img);
     bool release();
     bool getActivations(int i, bool norm_all);
-    
+
     // filters visualization
     // all filters for each layer
     std::vector<std::vector<cv::Mat> > filters;
     std::vector<std::vector<cv::Mat> > filters8;
     std::vector<std::vector<cv::Mat> > filters_t;
-   
+
     // grid of filters for each layer
     std::vector<cv::Mat> layers;
     std::vector<cv::Mat> layers8;
     std::vector<cv::Mat> layers_t;
-    
+
     std::vector<int> act_side;
     std::vector<int> act_n;
-    
+
     int layers_n = 0;
-    
+
     std::string cfg;
     std::string weights;
     bool initialized = false;
