@@ -9,6 +9,7 @@
 #       (default) OF_ROOT = ../../.. 
 ################################################################################
 # OF_ROOT = ../../..
+OF_ROOT = /home/sk/of_v0.9.8_linux64_release
 
 ################################################################################
 # PROJECT ROOT
@@ -61,7 +62,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_EXCLUSIONS =
+# PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/darknet/src/darknet.c
 
 ################################################################################
 # PROJECT LINKER FLAGS
