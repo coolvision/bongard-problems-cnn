@@ -9,6 +9,10 @@ openFrameworksUniversal.a
 libs/openFrameworksCompiled/lib/*/*
 !libs/openFrameworksCompiled/lib/*/.gitkeep
 
+darknet.a
+bin/darknet-vis
+*.so
+
 # apothecary
 scripts/apothecary
 
