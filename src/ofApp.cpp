@@ -28,8 +28,12 @@ void ofApp::update() {
             string path = dir.getPath(image_i);
             
             i1.load(path);
-            i1.extractFetures(&dn, layer_i, selected_image);
-            i1.processLayer(&dn, layer_i, selected_image);
+            i1.extractFetures(&dn);
+            
+            for (int i = 0; i < dn.net->n; i++) {
+                cout << "processLayer " << i << endl;
+                i1.processLayer(&dn, i, selected_image);
+            }
         }
     }
 }

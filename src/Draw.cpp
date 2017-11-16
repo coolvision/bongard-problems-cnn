@@ -109,10 +109,7 @@ void LayerVis::drawResizedActMaps(ofPoint off, float zoom) {
 
 void LayerVis::drawActMaps(ofPoint off, float zoom) {
     
-    ofPushStyle();
-    ofSetColor(ofColor::black);
-    ofDrawBitmapString(name, off.x, off.y - 10);
-    ofPopStyle();
+    int off_y = 10;
     
     int margin = 2;
     
@@ -124,13 +121,17 @@ void LayerVis::drawActMaps(ofPoint off, float zoom) {
                 
                 float w = act_maps[act_i].of_img.getWidth() / zoom;
                 float h = act_maps[act_i].of_img.getHeight() / zoom;
-                
                 act_maps[act_i].of_img.draw(off +
                             ofPoint(j * w + j * margin, i * h + i * margin),
                             w, h);
             }
         }
     }
+    
+    ofPushStyle();
+    ofSetColor(ofColor::black);
+    ofDrawBitmapString(name, off.x, off.y - off_y);
+    ofPopStyle();
 }
 
 void LayerVis::copyActMapsFrom(LayerVis *l) {
@@ -172,41 +173,30 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
     ofSetColor(ofColor::white);
 
     int margin = 20;
+    margin = positives_union.act_w;
+
+    float w = 2 * positives_union.act_side + (positives_union.act_w * positives_union.act_side) / layer_zoom;
+    float h = 2 * positives_union.act_side + (positives_union.act_h * positives_union.act_side) / layer_zoom;
+    w += margin;
+    h += margin;
     
-    if (selected_image >= 0 && selected_image < 12) {
+    ofPoint off = ofPoint(layer_offset.x,
+                          layer_offset.y);
 
-        int i = selected_image;
-      
-        margin = positives_union[i].act_side * 3;
-        
-        float w = positives_union[i].grid.of_img.getWidth() / layer_zoom;
-        float h = positives_union[i].grid.of_img.getHeight() / layer_zoom;
-        
-        ofPoint off = ofPoint(layer_offset.x + 0,
-                              layer_offset.y - h - margin);
-        
-        positives_union[i].drawActMaps(off, layer_zoom);
-        
-        off = ofPoint(layer_offset.x + w + margin,
-                      layer_offset.y - h - margin);
-        
-        negatives_union[i].drawActMaps(off, layer_zoom);
-        
-        off = ofPoint(layer_offset.x + 0,
-                      layer_offset.y - (h + margin) * 2);
-        
-        color_union[i].drawActMaps(off, layer_zoom);
-        
-        
-        off = ofPoint(layer_offset.x + 2*w + 2*margin,
-                      layer_offset.y - h - margin);
-        positives_intersection.drawResizedActMaps(off, layer_zoom);
-        
-        off = ofPoint(layer_offset.x + 3*w + 3*margin,
-                      layer_offset.y - h - margin);
-        negatives_intersection.drawResizedActMaps(off, layer_zoom);
-    }
+    positives_intersection.drawResizedActMaps(off, layer_zoom);
+    
+    off.x += w;
+    negatives_intersection.drawResizedActMaps(off, layer_zoom);
+    
+    off.x += w;
+    color_union.drawActMaps(off, layer_zoom);
+    
+    off.x += w;
+    positives_union.drawActMaps(off, layer_zoom);
 
+    off.x += w;
+    negatives_union.drawActMaps(off, layer_zoom);
+    
     for (int j = 0; j < 2; j++) {
         
         for (int i = 0; i < 6; i++) {
@@ -214,20 +204,15 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
             int idx = j * 6 + i;
             
             if (layer_i >= 0 && layer_i < images[idx].layers.size()) {
-                float w = images[idx].layers[layer_i].grid.of_img.getWidth() / layer_zoom;
-                float h = images[idx].layers[layer_i].grid.of_img.getHeight() / layer_zoom;
-                
-                w += margin;
-                h += margin;
-                
-                ofPoint off = ofPoint(layer_offset.x + j*w + j*10,
-                                      layer_offset.y + i*h + i*10);
+
+                ofPoint off = ofPoint(layer_offset.x + j*w,
+                                      layer_offset.y + i*h + h);
                 
                 images[idx].layers[layer_i].drawActMaps(off, layer_zoom);
             }
         }
     }
-    
+
     for (int j = 0; j < 2; j++) {
         
         for (int i = 0; i < 6; i++) {
@@ -235,16 +220,10 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
             int idx = j * 6 + i;
             
             if (layer_i >= 0 && layer_i < images[idx].layers.size()) {
-                float w = color_classified[idx].grid.of_img.getWidth() / layer_zoom;
-                float h = color_classified[idx].grid.of_img.getHeight() / layer_zoom;
                 
-                w += margin;
-                h += margin;
-                
-                ofPoint off = ofPoint(layer_offset.x + j*w + j*10 + w * 2.2,
-                                      layer_offset.y + i*h + i*10);
-                
-                //color_classified[idx].drawActMaps(off, layer_zoom);
+                ofPoint off = ofPoint(layer_offset.x + j*w + w*2 + margin,
+                                      layer_offset.y + i*h + h);
+
                 color_classified[idx].drawResizedActMaps(off, layer_zoom);
             }
         }
@@ -274,6 +253,7 @@ void ofApp::draw() {
 
     i1.draw(layer_i, ofPoint(layer_offset->x, layer_offset->y),
             layer_zoom, selected_image);
+    
     i1.drawImages(layer_i, ofPoint(offset->x, offset->y), zoom);
     
     gui.draw();

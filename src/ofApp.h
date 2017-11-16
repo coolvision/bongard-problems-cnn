@@ -86,7 +86,7 @@ public:
     vector<ImageActivations> images;
     
     bool load(string path);
-    bool extractFetures(Darknet *dn, int layer_i, int selected_image);
+    bool extractFetures(Darknet *dn);
     bool processLayer(Darknet *dn, int layer_i, int selected_image);
     ClassificationRule findClassificationRule(int selected_image);
     void classifyPixels(int selected_image);
@@ -100,9 +100,11 @@ public:
     LayerVis positives_intersection;
     LayerVis negatives_intersection;
 
-    vector<LayerVis> positives_union;
-    vector<LayerVis> negatives_union;
-    vector<LayerVis> color_union;
+    LayerVis positives_union;
+    LayerVis negatives_union;
+    LayerVis color_union;
+    
+    vector<LayerVis> ipl; // interections per layer
     
     vector<LayerVis> color_classified;
     

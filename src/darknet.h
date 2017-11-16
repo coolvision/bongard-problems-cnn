@@ -58,7 +58,8 @@ public:
 
     std::vector<int> act_side;
     std::vector<int> act_n;
-
+    std::vector<int> act_w;
+    
     int layers_n = 0;
 
     std::string cfg;

@@ -148,6 +148,7 @@ bool Darknet::getActivations(int layer_i, bool norm_all) {
 
     act_side[layer_i] = ceil(sqrt((float)net->layers[layer_i].out_c));
     act_n[layer_i] = net->layers[layer_i].out_c;
+//    act_w[layer_i] = net->layers[layer_i].out_w;
     //cout << "act_side " << act_side[layer_i] << ", total " << net->layers[layer_i].out_c << endl;
 
     // number of output images
