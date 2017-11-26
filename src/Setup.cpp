@@ -6,7 +6,7 @@ void ofApp::setup() {
     dir.open(ofToDataPath("./BP"));
     data_path = dir.getAbsolutePath();
 
-    image_i = 0;
+    image_i = 9;
     data_dir_size = 0;
     process = true;
 
@@ -25,7 +25,7 @@ void ofApp::setup() {
     //gui.add(norm_all.setup("norm_all", false));
     //gui.add(threshold.setup("threshold", true));
     
-    gui.add(selected_image.setup("selected_image", 0, 0, 11));
+    gui.add(selected_image.setup("selected_image", 0, 0, 5));
     
     gui.loadFromFile("settings.xml");
 

@@ -13,7 +13,6 @@ using namespace ofxCv;
 using namespace std;
 
 void colorDilate(Mat &m, int c_i = 0);
-//void colorDilatePositive(Mat &m);
 void classifyPixels(Mat &in, Mat &m, Mat &out);
 
 class VisImage {
@@ -66,15 +65,20 @@ public:
     vector<LayerVis> layers;
 };
 
-class ClassificationRule {
+class ClassifyingFeature {
 public:
-    
-    cv::Rect activation_region;
     int layer_i;
-    int feature_map_i;
-    
-    // test if image is positive or negative
-    bool apply(ImageActivations &img);
+    int map_i;
+    int filled_n;
+    std::vector<bool> map;
+};
+
+struct Feature {
+    int i;
+    int layer_i;
+    int map_i;
+    int image_i;
+    int state;
 };
 
 class ImagesSet {
@@ -85,20 +89,18 @@ public:
 // images and NN activations
     vector<ImageActivations> images;
     
-    bool load(string path);
-    bool extractFetures(Darknet *dn);
-    bool processLayer(Darknet *dn, int layer_i, int selected_image);
-    ClassificationRule findClassificationRule(int selected_image);
-    void classifyPixels(int selected_image);
+    vector<vector<Feature> > features;
     
+    bool load(string path);
+    bool extractFetures(Darknet *dn, int problem_i);
+    bool processLayer(Darknet *dn, int layer_i, int selected_image);
+
     int layers_n = -1;
     int layer_i = -1;
     
 // for visualization only
 //===================================================
-//    vector<LayerVis> positives_processed;
     LayerVis positives_intersection;
-    LayerVis negatives_intersection;
 
     LayerVis positives_union;
     LayerVis negatives_union;
@@ -107,6 +109,9 @@ public:
     vector<LayerVis> ipl; // interections per layer
     
     vector<LayerVis> color_classified;
+    
+    //vector<std::map<int, int> > common_features;
+    std::vector<ClassifyingFeature> common_features;
     
     bool draw(int layer_i, ofPoint layer_offset, float layer_zoom,
               int selected_image);
@@ -129,7 +134,7 @@ class ofApp : public ofBaseApp {
     bool process = true;
 
     string data_path;
-    int image_i;
+    int image_i = 9;
     int data_dir_size;
     
     ofxPanel gui;

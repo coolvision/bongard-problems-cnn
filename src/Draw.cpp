@@ -53,6 +53,7 @@ void LayerVis::resizeActMaps(int n) {
         
         resized_act_maps[a].m.create(n, n, act_maps[a].m.type());
         resized_act_maps[a].m.setTo(Scalar(0, 0, 0));
+        int bpp = resized_act_maps[a].m.channels();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 
@@ -62,19 +63,28 @@ void LayerVis::resizeActMaps(int n) {
                 for (int y = i*h; y < i*h+h; y++) {
                     for (int x = j*w; x < j*w+w; x++) {
                         uint8_t *p = act_maps[a].m.data +
-                            y * act_maps[a].m.cols * 3 + x * 3;
-                        if (p[0] > 0) n_r++;
-                        if (p[1] > 0) n_g++;
+                            y * act_maps[a].m.cols * bpp + x * bpp;
+                        if (bpp == 1) {
+                            if (p[0] > 0) n_r++;
+                        } else {
+                            if (p[0] > 0) n_r++;
+                            if (p[1] > 0) n_g++;
+                        }
                     }
                 }
                 
                 uint8_t *p = resized_act_maps[a].m.data +
-                    i * n * 3 + j * 3;
+                    i * n * bpp + j * bpp;
                 
-                if (n_r > 0)
-                    p[0] = 255;
-                if (n_g > 0)
-                    p[1] = 255;
+                if (bpp == 1) {
+                    if (n_r > 0)
+                        p[0] = 255;
+                } else {
+                    if (n_r > 0)
+                        p[0] = 255;
+                    if (n_g > 0)
+                        p[1] = 255;
+                }
             }
         }
         resized_act_maps[a].makeOF();
@@ -93,8 +103,9 @@ void LayerVis::drawResizedActMaps(ofPoint off, float zoom) {
     for (int i = 0; i < act_side; i++) {
         for (int j = 0; j < act_side; j++) {
             int act_i = i * act_side + j;
-            if (act_i < act_maps.size()) {
+            if (act_i < act_maps.size() && act_i < resized_act_maps.size()) {
                 if (!act_maps[act_i].of_img.isAllocated()) continue;
+                if (!resized_act_maps[act_i].of_img.isAllocated()) continue;
                 
                 float w = act_maps[act_i].of_img.getWidth() / zoom;
                 float h = act_maps[act_i].of_img.getHeight() / zoom;
@@ -141,6 +152,11 @@ void LayerVis::copyActMapsFrom(LayerVis *l) {
     for (int i = 0; i < act_maps.size(); i++) {
         act_maps[i].copyFrom(l->act_maps[i].m);
     }
+    
+    resized_act_maps.resize(l->resized_act_maps.size());
+    for (int i = 0; i < resized_act_maps.size(); i++) {
+        resized_act_maps[i].copyFrom(l->resized_act_maps[i].m);
+    }
 }
 
 void VisImage::copyFrom(Mat _m) {
@@ -185,9 +201,9 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
 
     positives_intersection.drawResizedActMaps(off, layer_zoom);
     
-    off.x += w;
-    negatives_intersection.drawResizedActMaps(off, layer_zoom);
-    
+//    off.x += w;
+//    negatives_intersection.drawResizedActMaps(off, layer_zoom);
+//    
     off.x += w;
     color_union.drawActMaps(off, layer_zoom);
     
@@ -228,7 +244,35 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
             }
         }
     }
+
+    for (int j = 0; j < 2; j++) {
+        
+        for (int i = 0; i < 6; i++) {
+            
+            int idx = j * 6 + i;
+            
+            if (layer_i >= 0 && layer_i < images[idx].layers.size()) {
+                
+                ofPoint off = ofPoint(layer_offset.x + j*w + w*3 + margin,
+                                      layer_offset.y + i*h + h);
+                
+                images[idx].layers[layer_i].drawResizedActMaps(off, layer_zoom);
+            }
+        }
+    }
     
+    
+    int lh = 0;
+    for (int i = 0; i < layers_n; i++) {
+        
+        ofPoint off = ofPoint(layer_offset.x + 2*w + w*4 + margin,
+                              layer_offset.y + lh);
+        
+        ipl[i].drawResizedActMaps(off, layer_zoom);
+
+        lh += 10 + 2 * ipl[i].act_side + (ipl[i].act_h * ipl[i].act_side) / layer_zoom;
+    }
+
 }
 
 bool ImagesSet::drawImages(int layer_i, ofPoint offset, float zoom) {

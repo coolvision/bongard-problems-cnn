@@ -20,15 +20,22 @@ bool ImagesSet::load(string path) {
         
         images[j].image.of_img.load(img_path);
         
-        cout << "load " << img_path << endl;
+        //cout << "load " << img_path << endl;
         
         images[j].image.m = toCv(images[j].image.of_img);
     }
 }
 
-bool ImagesSet::extractFetures(Darknet *dn) {
+bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
+    
+    features.resize(12);
+    
+    bool debug_print = false;
+    bool debug_print1 = false;
     
     for (int j = 0; j < images.size(); j++) {
+        
+        features[j].clear();
         
         dn->detect(images[j].image.m);
         images[j].layers.resize(dn->net->n);
@@ -43,9 +50,221 @@ bool ImagesSet::extractFetures(Darknet *dn) {
             images[j].layers[i].init(&dn->net->layers[i]);
             images[j].layers[i].makeActMaps();
 
+            images[j].layers[i].resizeActMaps(2);
+            
             images[j].layers[i].name = ofToString(j);
         }
+        
+        for (int i = 9; i >= 6; i--) {
+            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+                
+                Mat &m = images[j].layers[i].resized_act_maps[a].m;
+                
+                Feature f;
+                f.i = 0;
+                f.layer_i = i;
+                f.map_i = a;
+                f.image_i = j;
+                f.state = 0;
+                
+                if (m.cols == 2 && m.rows == 2) {
+                    uint8_t *p = m.data;
+                    if (p[0] > 0 || p[1] > 0 || p[2] > 0 || p[3] > 0) {
+                        f.state = 1;
+                    }
+                }
+                
+                features[j].push_back(f);
+            }
+//        }
+//
+//        for (int i = 9; i >= 6; i--) {
+            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+                
+                Mat &m = images[j].layers[i].resized_act_maps[a].m;
+                
+                Feature f;
+                f.i = 1;
+                f.layer_i = i;
+                f.map_i = a;
+                f.image_i = j;
+                f.state = 0;
+                
+                if (m.cols == 2 && m.rows == 2) {
+                    uint8_t *p = m.data;
+                    if (p[0] > 0 || p[2] > 0) {
+                        f.state = 1;
+                    }
+                }
+                
+                features[j].push_back(f);
+            }
+//        }
+//        
+//        for (int i = 9; i >= 6; i--) {
+            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+                
+                Mat &m = images[j].layers[i].resized_act_maps[a].m;
+                
+                Feature f;
+                f.i = 2;
+                f.layer_i = i;
+                f.map_i = a;
+                f.image_i = j;
+                f.state = 0;
+                
+                if (m.cols == 2 && m.rows == 2) {
+                    uint8_t *p = m.data;
+                    if (p[1] > 0 || p[3] > 0) {
+                        f.state = 1;
+                    }
+                }
+                
+                features[j].push_back(f);
+            }
+//        }
+//
+//        for (int i = 9; i >= 6; i--) {
+            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+                
+                Mat &m = images[j].layers[i].resized_act_maps[a].m;
+                
+                Feature f;
+                f.i = 3;
+                f.layer_i = i;
+                f.map_i = a;
+                f.image_i = j;
+                f.state = 0;
+                
+                if (m.cols == 2 && m.rows == 2) {
+                    uint8_t *p = m.data;
+                    if (p[0] > 0 || p[1] > 0) {
+                        f.state = 1;
+                    }
+                }
+                
+                features[j].push_back(f);
+            }
+//        }
+//        
+//        for (int i = 9; i >= 6; i--) {
+            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+                
+                Mat &m = images[j].layers[i].resized_act_maps[a].m;
+                
+                Feature f;
+                f.i = 4;
+                f.layer_i = i;
+                f.map_i = a;
+                f.image_i = j;
+                f.state = 0;
+                
+                if (m.cols == 2 && m.rows == 2) {
+                    uint8_t *p = m.data;
+                    if (p[2] > 0 || p[3] > 0) {
+                        f.state = 1;
+                    }
+                }
+                
+                features[j].push_back(f);
+            }
+        }
+        
+        if (debug_print) cout << "image " << j << " " << features[j].size() << endl;
     }
+    
+    if (features.empty()) return false;
+    
+    bool found = false;
+    bool test_correct = false;
+    for (int i = 0; i < features[0].size(); i++) {
+
+        // positive = 1
+        bool correct = true;
+        for (int j = 0; j < 5; j++) {
+            if (features[j][i].state == 0) {
+                correct = false;
+                break;
+            }
+        }
+        for (int j = 6; j < 11; j++) {
+            if (features[j][i].state == 1) {
+                correct = false;
+                break;
+            }
+        }
+        if (correct) {
+            if (features[5][i].state != features[11][i].state) {
+                if (debug_print1) cout << "(valid) classify with positive = 1: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
+                for (int j = 0; j < 12; j++) {
+                    if (debug_print1) cout << features[j][i].state << " ";
+                }
+                if (debug_print1) cout << endl;
+                found = true;
+                if (features[5][i].state == 1) {
+//                if (features[5][i].state == 1 && features[11][i].state == 0) {
+                    if (debug_print1) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
+                    test_correct = true;
+                } else {
+                    test_correct = false;
+                }
+            } else {
+                if (debug_print) cout << "(not valid) classify with positive = 1: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
+            }
+            for (int j = 0; j < 12; j++) {
+                if (debug_print) cout << features[j][i].state << " ";
+            }
+            if (debug_print) cout << endl;
+            if (!debug_print) if (found) break;
+        }
+        
+        // positive = 0
+        correct = true;
+        for (int j = 0; j < 5; j++) {
+            if (features[j][i].state == 1) {
+                correct = false;
+                break;
+            }
+        }
+        for (int j = 6; j < 11; j++) {
+            if (features[j][i].state == 0) {
+                correct = false;
+                break;
+            }
+        }
+        if (correct) {
+            if (features[5][i].state != features[11][i].state) {
+//            if (features[5][i].state == 0) {
+                if (debug_print1) cout << "(valid) classify with positive = 0: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
+                for (int j = 0; j < 12; j++) {
+                    if (debug_print1) cout << features[j][i].state << " ";
+                }
+                if (debug_print1) cout << endl;
+                found = true;
+                if (features[5][i].state == 0) {
+//                if (features[5][i].state == 0 && features[11][i].state == 1) {
+                    if (debug_print1) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
+                    test_correct = true;
+                } else {
+                    test_correct = false;
+                }
+            
+            } else {
+                if (debug_print) cout << "(not valid) classify with positive = 0: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
+            }
+            for (int j = 0; j < 12; j++) {
+                if (debug_print) cout << features[j][i].state << " ";
+            }
+            if (debug_print) cout << endl;
+            if (!debug_print) if (found) break;
+        }
+    }
+    
+    if (found) {
+        cout << problem_i << " solved, " << test_correct << endl;
+    }
+    
+    
 }
 
 bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
@@ -124,17 +343,17 @@ bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
         
         color_classified[i].resizeActMaps(2);
         
-        if (i < 6) {
-            for (auto &a: color_classified[i].resized_act_maps) {
-                colorDilate(a.m, 0);
-                a.makeOF();
-            }
-        } else {
-            for (auto &a: color_classified[i].resized_act_maps) {
-                colorDilate(a.m, 1);
-                a.makeOF();
-            }
-        }
+//        if (i < 6) {
+//            for (auto &a: color_classified[i].resized_act_maps) {
+//                colorDilate(a.m, 0);
+//                a.makeOF();
+//            }
+//        } else {
+//            for (auto &a: color_classified[i].resized_act_maps) {
+//                colorDilate(a.m, 1);
+//                a.makeOF();
+//            }
+//        }
     }
 
     positives_intersection.init(&color_classified[0]);
@@ -154,31 +373,39 @@ bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
         }
     }
     
-    for (auto &a: positives_intersection.resized_act_maps) {
-        colorDilate(a.m, 0);
-        a.makeOF();
-    }
-
-    negatives_intersection.init(&color_classified[0]);
-    negatives_intersection.grid.m.create(color_classified[0].grid.m.size(),
-                                         color_classified[0].grid.m.type());
-    negatives_intersection.grid.m.setTo(cv::Scalar(255, 255, 255));
-    negatives_intersection.makeActMaps();
-    negatives_intersection.resizeActMaps(2);
-
-    for (int j = 6; j < 12; j++) {
-        if (j == selected_image) continue;
-        for (int a = 0; a < negatives_intersection.resized_act_maps.size(); a++) {
-            bitwise_and(color_classified[j].resized_act_maps[a].m,
-                        negatives_intersection.resized_act_maps[a].m,
-                        negatives_intersection.resized_act_maps[a].m);
-            negatives_intersection.resized_act_maps[a].makeOF();
-        }
-    }
+//    for (auto &a: positives_intersection.resized_act_maps) {
+//        colorDilate(a.m, 0);
+//        a.makeOF();
+//    }
     
-    for (auto &a: negatives_intersection.resized_act_maps) {
-        colorDilate(a.m, 1);
-        a.makeOF();
+    ipl[layer_i].init(&positives_intersection);
+    ipl[layer_i].copyActMapsFrom(&positives_intersection);
+    
+    for (int n = 0; n < ipl[layer_i].resized_act_maps.size(); n++) {
+        
+        Mat &m = ipl[layer_i].resized_act_maps[n].m;
+        
+        ClassifyingFeature cf;
+        cf.layer_i = layer_i;
+        cf.map_i = n;
+       
+        
+        int filled_n = 0;
+        for (int i = 0; i < m.rows; i++) {
+            for (int j = 0; j < m.cols; j++) {
+                uint8_t *p = m.data + i * m.cols * 3 + j * 3;
+                cf.map.push_back(*p);
+                if (p[0] > 0 && p[1] == 0 && p[2] == 0) {
+                    filled_n++;
+                    //cout << "map: " << n << "; i: " << i << " j: " << j << endl;
+                }
+            }
+        }
+        
+        cf.filled_n = filled_n;
+        if (filled_n > 0) {
+            common_features.push_back(cf);
+        }
     }
 }
 

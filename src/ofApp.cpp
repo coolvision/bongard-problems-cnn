@@ -20,6 +20,12 @@ void ofApp::update() {
         
         if (data_dir_size > 0) {
             
+            for (int i = 0; i < data_dir_size; i++) {
+                string path = dir.getPath(i);
+                i1.load(path);
+                i1.extractFetures(&dn, i);
+            }
+            
             if (image_i >= data_dir_size) {
                 image_i = data_dir_size - 1;
             }
@@ -28,12 +34,16 @@ void ofApp::update() {
             string path = dir.getPath(image_i);
             
             i1.load(path);
-            i1.extractFetures(&dn);
+            i1.extractFetures(&dn, image_i);
             
+            i1.ipl.resize(dn.net->n);
+            i1.common_features.clear();
+            //cout << "processLayer " << endl;
             for (int i = 0; i < dn.net->n; i++) {
-                cout << "processLayer " << i << endl;
+                //cout << i << " ";
                 i1.processLayer(&dn, i, selected_image);
             }
+//            cout << endl;
         }
     }
 }

@@ -92,7 +92,7 @@ bool Darknet::detect(cv::Mat &img) {
     clock_t time=clock();
     network_predict(*net, X);
     clock_t time2=clock();
-    printf("Predicted in %f seconds. %ld %ld %ld\n", sec(time2-time), CLOCKS_PER_SEC, time, time2);
+   // printf("Predicted in %f seconds. %ld %ld %ld\n", sec(time2-time), CLOCKS_PER_SEC, time, time2);
 
 #ifdef DARKNET_GPU
     get_network_output_gpu(*net);
