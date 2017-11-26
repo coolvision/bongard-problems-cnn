@@ -20,10 +20,20 @@ void ofApp::update() {
         
         if (data_dir_size > 0) {
             
+            int solved_n = 0;
+            int correct_n = 0;
             for (int i = 0; i < data_dir_size; i++) {
                 string path = dir.getPath(i);
                 i1.load(path);
+                
+                i1.solved = false;
+                i1.correct = false;
                 i1.extractFetures(&dn, i);
+                
+                if (i1.solved) solved_n++;
+                if (i1.solved && i1.correct) correct_n++;
+                
+                cout << "solved: " << solved_n << ", correct: " << correct_n << endl;
             }
             
             if (image_i >= data_dir_size) {
@@ -37,13 +47,12 @@ void ofApp::update() {
             i1.extractFetures(&dn, image_i);
             
             i1.ipl.resize(dn.net->n);
-            i1.common_features.clear();
-            //cout << "processLayer " << endl;
             for (int i = 0; i < dn.net->n; i++) {
-                //cout << i << " ";
                 i1.processLayer(&dn, i, selected_image);
             }
-//            cout << endl;
+
+            layer_i = 8;
+            i1.processLayer(&dn, 8, selected_image);
         }
     }
 }

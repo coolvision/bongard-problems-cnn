@@ -199,19 +199,14 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
     ofPoint off = ofPoint(layer_offset.x,
                           layer_offset.y);
 
-    positives_intersection.drawResizedActMaps(off, layer_zoom);
-    
-//    off.x += w;
-//    negatives_intersection.drawResizedActMaps(off, layer_zoom);
-//    
-    off.x += w;
-    color_union.drawActMaps(off, layer_zoom);
-    
-    off.x += w;
-    positives_union.drawActMaps(off, layer_zoom);
+    positives_union.drawResizedActMaps(off, layer_zoom);
 
     off.x += w;
-    negatives_union.drawActMaps(off, layer_zoom);
+    negatives_union.drawResizedActMaps(off, layer_zoom);
+
+    off.x += w;
+    color_union.drawResizedActMaps(off, layer_zoom);
+    
     
     for (int j = 0; j < 2; j++) {
         
@@ -239,33 +234,16 @@ bool ImagesSet::draw(int layer_i, ofPoint layer_offset, float layer_zoom,
                 
                 ofPoint off = ofPoint(layer_offset.x + j*w + w*2 + margin,
                                       layer_offset.y + i*h + h);
-
-                color_classified[idx].drawResizedActMaps(off, layer_zoom);
-            }
-        }
-    }
-
-    for (int j = 0; j < 2; j++) {
-        
-        for (int i = 0; i < 6; i++) {
-            
-            int idx = j * 6 + i;
-            
-            if (layer_i >= 0 && layer_i < images[idx].layers.size()) {
-                
-                ofPoint off = ofPoint(layer_offset.x + j*w + w*3 + margin,
-                                      layer_offset.y + i*h + h);
                 
                 images[idx].layers[layer_i].drawResizedActMaps(off, layer_zoom);
             }
         }
     }
     
-    
     int lh = 0;
     for (int i = 0; i < layers_n; i++) {
         
-        ofPoint off = ofPoint(layer_offset.x + 2*w + w*4 + margin,
+        ofPoint off = ofPoint(layer_offset.x + 2*w + w*2 + margin,
                               layer_offset.y + lh);
         
         ipl[i].drawResizedActMaps(off, layer_zoom);

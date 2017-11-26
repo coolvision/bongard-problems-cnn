@@ -6,7 +6,7 @@ void ofApp::setup() {
     dir.open(ofToDataPath("./BP"));
     data_path = dir.getAbsolutePath();
 
-    image_i = 9;
+    image_i = 1;
     data_dir_size = 0;
     process = true;
 

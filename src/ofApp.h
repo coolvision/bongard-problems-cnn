@@ -90,9 +90,12 @@ public:
     vector<ImageActivations> images;
     
     vector<vector<Feature> > features;
+    bool solved;
+    bool correct;
     
     bool load(string path);
     bool extractFetures(Darknet *dn, int problem_i);
+    bool extractFeture(int i, int j, int index);
     bool processLayer(Darknet *dn, int layer_i, int selected_image);
 
     int layers_n = -1;
@@ -100,19 +103,12 @@ public:
     
 // for visualization only
 //===================================================
-    LayerVis positives_intersection;
-
     LayerVis positives_union;
     LayerVis negatives_union;
     LayerVis color_union;
     
     vector<LayerVis> ipl; // interections per layer
-    
-    vector<LayerVis> color_classified;
-    
-    //vector<std::map<int, int> > common_features;
-    std::vector<ClassifyingFeature> common_features;
-    
+
     bool draw(int layer_i, ofPoint layer_offset, float layer_zoom,
               int selected_image);
     bool drawImages(int layer_i, ofPoint offset, float zoom);

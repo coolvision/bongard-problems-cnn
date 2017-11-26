@@ -31,7 +31,6 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
     features.resize(12);
     
     bool debug_print = false;
-    bool debug_print1 = false;
     
     for (int j = 0; j < images.size(); j++) {
         
@@ -56,118 +55,11 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
         }
         
         for (int i = 9; i >= 6; i--) {
-            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
-                
-                Mat &m = images[j].layers[i].resized_act_maps[a].m;
-                
-                Feature f;
-                f.i = 0;
-                f.layer_i = i;
-                f.map_i = a;
-                f.image_i = j;
-                f.state = 0;
-                
-                if (m.cols == 2 && m.rows == 2) {
-                    uint8_t *p = m.data;
-                    if (p[0] > 0 || p[1] > 0 || p[2] > 0 || p[3] > 0) {
-                        f.state = 1;
-                    }
-                }
-                
-                features[j].push_back(f);
-            }
-//        }
-//
-//        for (int i = 9; i >= 6; i--) {
-            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
-                
-                Mat &m = images[j].layers[i].resized_act_maps[a].m;
-                
-                Feature f;
-                f.i = 1;
-                f.layer_i = i;
-                f.map_i = a;
-                f.image_i = j;
-                f.state = 0;
-                
-                if (m.cols == 2 && m.rows == 2) {
-                    uint8_t *p = m.data;
-                    if (p[0] > 0 || p[2] > 0) {
-                        f.state = 1;
-                    }
-                }
-                
-                features[j].push_back(f);
-            }
-//        }
-//        
-//        for (int i = 9; i >= 6; i--) {
-            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
-                
-                Mat &m = images[j].layers[i].resized_act_maps[a].m;
-                
-                Feature f;
-                f.i = 2;
-                f.layer_i = i;
-                f.map_i = a;
-                f.image_i = j;
-                f.state = 0;
-                
-                if (m.cols == 2 && m.rows == 2) {
-                    uint8_t *p = m.data;
-                    if (p[1] > 0 || p[3] > 0) {
-                        f.state = 1;
-                    }
-                }
-                
-                features[j].push_back(f);
-            }
-//        }
-//
-//        for (int i = 9; i >= 6; i--) {
-            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
-                
-                Mat &m = images[j].layers[i].resized_act_maps[a].m;
-                
-                Feature f;
-                f.i = 3;
-                f.layer_i = i;
-                f.map_i = a;
-                f.image_i = j;
-                f.state = 0;
-                
-                if (m.cols == 2 && m.rows == 2) {
-                    uint8_t *p = m.data;
-                    if (p[0] > 0 || p[1] > 0) {
-                        f.state = 1;
-                    }
-                }
-                
-                features[j].push_back(f);
-            }
-//        }
-//        
-//        for (int i = 9; i >= 6; i--) {
-            for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
-                
-                Mat &m = images[j].layers[i].resized_act_maps[a].m;
-                
-                Feature f;
-                f.i = 4;
-                f.layer_i = i;
-                f.map_i = a;
-                f.image_i = j;
-                f.state = 0;
-                
-                if (m.cols == 2 && m.rows == 2) {
-                    uint8_t *p = m.data;
-                    if (p[2] > 0 || p[3] > 0) {
-                        f.state = 1;
-                    }
-                }
-                
-                features[j].push_back(f);
-            }
+            extractFeture(i, j, 0);
+            extractFeture(i, j, 1);
+            extractFeture(i, j, 2);
+            extractFeture(i, j, 3);
+            extractFeture(i, j, 4);
         }
         
         if (debug_print) cout << "image " << j << " " << features[j].size() << endl;
@@ -177,6 +69,8 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
     
     bool found = false;
     bool test_correct = false;
+    int solution_layer_i = -1;
+    int solution_map_i = -1;
     for (int i = 0; i < features[0].size(); i++) {
 
         // positive = 1
@@ -195,15 +89,12 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
         }
         if (correct) {
             if (features[5][i].state != features[11][i].state) {
-                if (debug_print1) cout << "(valid) classify with positive = 1: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
-                for (int j = 0; j < 12; j++) {
-                    if (debug_print1) cout << features[j][i].state << " ";
-                }
-                if (debug_print1) cout << endl;
+                if (debug_print) cout << "(valid) classify with positive = 1: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
                 found = true;
+                solution_layer_i = features[0][i].layer_i;
+                solution_map_i = features[0][i].map_i;
                 if (features[5][i].state == 1) {
-//                if (features[5][i].state == 1 && features[11][i].state == 0) {
-                    if (debug_print1) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
+                    if (debug_print) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
                     test_correct = true;
                 } else {
                     test_correct = false;
@@ -215,7 +106,7 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
                 if (debug_print) cout << features[j][i].state << " ";
             }
             if (debug_print) cout << endl;
-            if (!debug_print) if (found) break;
+            if (found) break;
         }
         
         // positive = 0
@@ -234,16 +125,12 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
         }
         if (correct) {
             if (features[5][i].state != features[11][i].state) {
-//            if (features[5][i].state == 0) {
-                if (debug_print1) cout << "(valid) classify with positive = 0: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
-                for (int j = 0; j < 12; j++) {
-                    if (debug_print1) cout << features[j][i].state << " ";
-                }
-                if (debug_print1) cout << endl;
+                if (debug_print) cout << "(valid) classify with positive = 0: " << features[0][i].i << " " << features[0][i].layer_i << " " << features[0][i].map_i << endl;
                 found = true;
+                solution_layer_i = features[0][i].layer_i;
+                solution_map_i = features[0][i].map_i;
                 if (features[5][i].state == 0) {
-//                if (features[5][i].state == 0 && features[11][i].state == 1) {
-                    if (debug_print1) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
+                    if (debug_print) cout << "correct: " << features[5][i].state << " " << features[11][i].state << endl;
                     test_correct = true;
                 } else {
                     test_correct = false;
@@ -256,27 +143,69 @@ bool ImagesSet::extractFetures(Darknet *dn, int problem_i) {
                 if (debug_print) cout << features[j][i].state << " ";
             }
             if (debug_print) cout << endl;
-            if (!debug_print) if (found) break;
+            if (found) break;
         }
     }
     
     if (found) {
-        cout << problem_i << " solved, " << test_correct << endl;
+        solved = true;
+        correct = test_correct;
+        cout << problem_i << " solved (" << solution_layer_i << "," << solution_map_i << ") " << test_correct << endl;
     }
+}
+
+bool ImagesSet::extractFeture(int i, int j, int index) {
     
-    
+    for (int a = 0; a < images[j].layers[i].resized_act_maps.size(); a++) {
+        
+        Mat &m = images[j].layers[i].resized_act_maps[a].m;
+        
+        Feature f;
+        f.i = index;
+        f.layer_i = i;
+        f.map_i = a;
+        f.image_i = j;
+        f.state = 0;
+        
+        if (m.cols == 2 && m.rows == 2) {
+            uint8_t *p = m.data;
+            if (index == 0) {
+                if (p[0] > 0 || p[1] > 0 || p[2] > 0 || p[3] > 0) {
+                    f.state = 1;
+                }
+            } else if (index == 1) {
+                if (p[0] > 0 || p[2] > 0) {
+                    f.state = 1;
+                }
+            } else if (index == 2) {
+                if (p[1] > 0 || p[3] > 0) {
+                    f.state = 1;
+                }
+            } else if (index == 3) {
+                if (p[0] > 0 || p[1] > 0) {
+                    f.state = 1;
+                }
+            } else if (index == 4) {
+                if (p[2] > 0 || p[3] > 0) {
+                    f.state = 1;
+                }
+            } else {
+                return false;
+            }
+        }
+        
+        features[j].push_back(f);
+    }
 }
 
 bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
     
     this->layer_i = layer_i;
     
+    if (selected_image < 0 || selected_image >= 12) return false;
     if (layer_i < 0 || layer_i > dn->net->n) return false;
     if (images.empty()) return false;
     if (images[0].layers[layer_i].act_n == 0) return false;
-        
-    color_classified.clear();
-    color_classified.resize(12);
     
     positives_union.grid.copyFrom(images[0].layers[layer_i].grid.m);
     positives_union.init(&images[0].layers[layer_i]);
@@ -307,6 +236,9 @@ bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
     positives_union.makeActMaps();
     negatives_union.makeActMaps();
     
+    positives_union.resizeActMaps(2);
+    negatives_union.resizeActMaps(2);
+    
     vector<Mat> ch;
     Mat blank(positives_union.grid.m.size(), CV_8UC1);
     blank.setTo(cv::Scalar(0));
@@ -320,142 +252,10 @@ bool ImagesSet::processLayer(Darknet *dn, int layer_i, int selected_image) {
     color_union.init(&positives_union);
     color_union.grid.makeOF();
     color_union.makeActMaps();
-    
-    
-    for (int i = 0; i < 12; i++) {
-        
-        if (i == selected_image) continue;
-        
-        if (i < 6) {
-            ch[0] = images[i].layers[layer_i].grid.m;
-            ch[1] = negatives_union.grid.m;
-            ch[2] = blank;
-        } else {
-            ch[0] = positives_union.grid.m;
-            ch[1] = images[i].layers[layer_i].grid.m;
-            ch[2] = blank;
-        }
-        
-        color_classified[i].init(&images[selected_image].layers[layer_i]);
-        cv::merge(ch, color_classified[i].grid.m);
-        color_classified[i].grid.makeOF();
-        color_classified[i].makeActMaps();
-        
-        color_classified[i].resizeActMaps(2);
-        
-//        if (i < 6) {
-//            for (auto &a: color_classified[i].resized_act_maps) {
-//                colorDilate(a.m, 0);
-//                a.makeOF();
-//            }
-//        } else {
-//            for (auto &a: color_classified[i].resized_act_maps) {
-//                colorDilate(a.m, 1);
-//                a.makeOF();
-//            }
-//        }
-    }
 
-    positives_intersection.init(&color_classified[0]);
-    positives_intersection.grid.m.create(color_classified[0].grid.m.size(),
-                                         color_classified[0].grid.m.type());
-    positives_intersection.grid.m.setTo(cv::Scalar(255, 255, 255));
-    positives_intersection.makeActMaps();
-    positives_intersection.resizeActMaps(2);
-
-    for (int j = 0; j < 6; j++) {
-        if (j == selected_image) continue;
-        for (int a = 0; a < positives_intersection.resized_act_maps.size(); a++) {
-            bitwise_and(color_classified[j].resized_act_maps[a].m,
-                        positives_intersection.resized_act_maps[a].m,
-                        positives_intersection.resized_act_maps[a].m);
-            positives_intersection.resized_act_maps[a].makeOF();
-        }
-    }
+    color_union.resizeActMaps(2);
     
-//    for (auto &a: positives_intersection.resized_act_maps) {
-//        colorDilate(a.m, 0);
-//        a.makeOF();
-//    }
-    
-    ipl[layer_i].init(&positives_intersection);
-    ipl[layer_i].copyActMapsFrom(&positives_intersection);
-    
-    for (int n = 0; n < ipl[layer_i].resized_act_maps.size(); n++) {
-        
-        Mat &m = ipl[layer_i].resized_act_maps[n].m;
-        
-        ClassifyingFeature cf;
-        cf.layer_i = layer_i;
-        cf.map_i = n;
-       
-        
-        int filled_n = 0;
-        for (int i = 0; i < m.rows; i++) {
-            for (int j = 0; j < m.cols; j++) {
-                uint8_t *p = m.data + i * m.cols * 3 + j * 3;
-                cf.map.push_back(*p);
-                if (p[0] > 0 && p[1] == 0 && p[2] == 0) {
-                    filled_n++;
-                    //cout << "map: " << n << "; i: " << i << " j: " << j << endl;
-                }
-            }
-        }
-        
-        cf.filled_n = filled_n;
-        if (filled_n > 0) {
-            common_features.push_back(cf);
-        }
-    }
-}
-
-void colorDilate(Mat &m, int c_i) {
-    
-    Mat tmp;
-    for (int d = 0; d < 10; d++) {
-        
-        m.copyTo(tmp);
-        
-        int n_added = 0;
-        
-        for (int i = 0; i < m.rows; i++) {
-            for (int j = 0; j < m.cols; j++) {
-                uint8_t *p = m.data + i * m.cols * 3 + j * 3;
-                uint8_t *t = tmp.data + i * tmp.cols * 3 + j * 3;
-                if (p[0] == 0 && p[1] == 0 && p[2] == 0) {
-                    
-                    int rn = 0;
-                    int gn = 0;
-                    for (int q = -1; q <= 1; q++) {
-                        for (int w = -1; w <= 1; w++) {
-                            if (q == w) continue;
-                            if (i+q < 0 || j+w < 0 ||
-                                i+q >= m.rows || j+w >= m.cols) continue;
-                            uint8_t *p1 = m.data + (i+q) * m.cols * 3 + (j+w) * 3;
-                            if (p1[0] > 0 && p1[1] == 0) rn++;
-                            if (p1[1] > 0 && p1[0] == 0) gn++;
-                        }
-                    }
-                    if (c_i == 0) {
-                        if (rn > 0) {
-                            t[0] = 255;
-                            n_added++;
-                        }
-                    } else {
-                        if (gn > 0) {
-                            t[0] = 255;
-                            n_added++;
-                        }
-                    }
-                }
-            }
-        }
-        
-        tmp.copyTo(m);
-        
-        if (n_added == 0) {
-            break;
-        }
-    }
+    ipl[layer_i].init(&images[selected_image].layers[layer_i]);
+    ipl[layer_i].copyActMapsFrom(&images[selected_image].layers[layer_i]);
 }
 
