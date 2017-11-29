@@ -63,7 +63,6 @@ OF_ROOT = ../../..
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
 PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/darknet/src%
-PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/addons
 
 ################################################################################
 # PROJECT LINKER FLAGS
@@ -81,6 +80,7 @@ PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/addons
 # TODO: should this be a default setting?
 # PROJECT_LDFLAGS=-Wl,-rpath=./libs
 #PROJECT_LDFLAGS=-Wl,-rpath=./libs,-L/usr/local/cuda-7.5/lib64,$(PROJECT_ROOT)/darknet/src/darknet.a,-lcublas,-lcurand
+PROJECT_LDFLAGS=-Wl,-rpath=./libs,-L/usr/local/cuda-7.5/lib64,$(PROJECT_ROOT)/darknet/src/darknet.a
 
 ################################################################################
 # PROJECT DEFINES
