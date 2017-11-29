@@ -9,7 +9,7 @@
 #       (default) OF_ROOT = ../../..
 ################################################################################
 # OF_ROOT = ../../..
-OF_ROOT = /home/sk/of_v0.9.8_linux64_release
+OF_ROOT = ../../..
 
 ################################################################################
 # PROJECT ROOT
@@ -79,7 +79,7 @@ PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/darknet/src%
 # incorporated directly into the final executable application binary.
 # TODO: should this be a default setting?
 # PROJECT_LDFLAGS=-Wl,-rpath=./libs
-PROJECT_LDFLAGS=-Wl,-rpath=./libs,-L/usr/local/cuda-7.5/lib64,$(PROJECT_ROOT)/darknet/src/darknet.a,-lcublas,-lcurand
+#PROJECT_LDFLAGS=-Wl,-rpath=./libs,-L/usr/local/cuda-7.5/lib64,$(PROJECT_ROOT)/darknet/src/darknet.a,-lcublas,-lcurand
 
 ################################################################################
 # PROJECT DEFINES
@@ -90,7 +90,7 @@ PROJECT_LDFLAGS=-Wl,-rpath=./libs,-L/usr/local/cuda-7.5/lib64,$(PROJECT_ROOT)/da
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_DEFINES = DARKNET_GPU
+#PROJECT_DEFINES = DARKNET_GPU
 
 ################################################################################
 # PROJECT CFLAGS
@@ -108,7 +108,7 @@ PROJECT_DEFINES = DARKNET_GPU
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
 # PROJECT_CFLAGS =
-PROJECT_CFLAGS += -DOPENCV -DGPU -I/usr/local/cuda/include/
+#PROJECT_CFLAGS += -DOPENCV -DGPU -I/usr/local/cuda/include/
 
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS

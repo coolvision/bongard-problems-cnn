@@ -1,0 +1,7 @@
+classes=26
+train  = /home/sk/data/shapes_simple_26/train.list
+valid  = /home/sk/data/shapes_simple_26/test.list
+test  = /home/sk/data/shapes_simple_26/test.list
+labels = /home/sk/data/shapes_simple_26/labels.txt
+backup = /media/sk/store/data/shapes_simple_26
+top=2
