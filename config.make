@@ -63,6 +63,7 @@ OF_ROOT = ../../..
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
 PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/darknet/src%
+PROJECT_EXCLUSIONS += $(PROJECT_ROOT)/addons
 
 ################################################################################
 # PROJECT LINKER FLAGS
